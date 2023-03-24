@@ -12,8 +12,9 @@ This repo contains the code to derive the equations of motion of the system usin
 3) Run [`test_BallbotSimulation`](Tests/test_BallbotSimulation.m). In this script, you can modify the simulation parameters, such as the initial and final conditionds, constraints, and duration. 
 
 Here's an example of the multiple-shooting optimal controller moving the ballbot between two positions. 
-https://user-images.githubusercontent.com/70407790/227578747-8742db34-f6de-419e-a910-0c47f998bb5b.mp4
 
+
+https://user-images.githubusercontent.com/70407790/227629255-93a0f35a-fe6e-471c-8e22-80b6b0ee4f2e.mp4
 
 ## Control
 Coming soon!
