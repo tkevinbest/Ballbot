@@ -1,4 +1,4 @@
-function [mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = loadBallbotParams()
+function [mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = defineParams()
 % Ballbot parameters -> From Table 2.1
 mk = 2.29; 
 mw = 3;

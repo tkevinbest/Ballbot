@@ -1,7 +1,7 @@
 clear
 close all
 
-[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.loadBallbotParams();
+[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 % Desired X position
 desX = 1.25;

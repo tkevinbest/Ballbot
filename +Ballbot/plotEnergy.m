@@ -2,7 +2,7 @@ function plotEnergy(tout, qout_first_order, torque)
 if size(qout_first_order,2) > 4
     qout_first_order = qout_first_order.';
 end
-[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.loadBallbotParams();
+[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 for ix = 1:length(tout)
     phi = qout_first_order(ix,1); 

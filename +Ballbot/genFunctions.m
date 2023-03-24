@@ -4,7 +4,7 @@
 function genFunctions()
 
 % Load relevant ballbot params
-[mk, mw, ma, rk, rw, ra, l, omegaK, omegaW, omegaA, g] = Ballbot.loadBallbotParams();
+[mk, mw, ma, rk, rw, ra, l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 syms t
 syms phix(t) phiz(t)

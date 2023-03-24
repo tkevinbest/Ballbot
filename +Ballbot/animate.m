@@ -45,7 +45,7 @@ function drawBallbot(q, f)
 phi = q(1);
 theta = q(2); 
 
-[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.loadBallbotParams();
+[mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 % Rotation matrix
 rotmat = @(theta) [cos(theta) -sin(theta); sin(theta) cos(theta)];
