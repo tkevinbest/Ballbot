@@ -17,6 +17,9 @@ q_anim = interp1(t, q, t_anim);
 
 if saveVideo
     warning('off','MATLAB:audiovideo:VideoWriter:mp4FramePadded');
+    if ~exist('Animations', 'dir')
+       mkdir('Animations')
+    end
     v = VideoWriter(fullfile('Animations',videoName),'MPEG-4');
     v.Quality = 100;
     v.FrameRate = FPS;
