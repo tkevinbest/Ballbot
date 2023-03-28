@@ -88,4 +88,22 @@ matlabFunction(Vw_subsd, 'File','./+Ballbot/Vw','Vars',argumentVars);
 matlabFunction(Ta_subsd, 'File','./+Ballbot/Ta','Vars',argumentVars); 
 matlabFunction(Va_subsd, 'File','./+Ballbot/Va','Vars',argumentVars); 
 
+
+% Calculate linearized dynamics
+z = sym('z',[4;1]);
+q = [z(1); z(3)];
+qdot = [z(2); z(4)];
+u = sym('u',[1;1]); 
+
+% Define linearized dynamics
+M = Ballbot.M(q,0); 
+f = Ballbot.f(q, qdot, u); 
+qddot = M\f;
+zdot = [qdot(1); qddot(1); qdot(2); qddot(2)];
+
+A_lin_symb = jacobian(zdot, z); 
+B_lin_symb = jacobian(zdot, u); 
+matlabFunction(A_lin_symb, 'File','./+Ballbot/A_lin_symb','Vars',{z, u}); 
+matlabFunction(B_lin_symb, 'File','./+Ballbot/B_lin_symb','Vars',{z, u}); 
+
 end

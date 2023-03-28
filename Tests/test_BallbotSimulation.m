@@ -13,10 +13,10 @@ tspan = linspace(0,2,10000);
 plotIt = true; 
 
 % Call simulation
-[t,q, qdot, qout_first_order, torque] = Ballbot.runSimulation(q0, qdot0, @forceFunc, tspan, plotIt);
+[t,q, qdot, z, torque] = Ballbot.runSimulation(q0, qdot0, @forceFunc, tspan, plotIt);
 
 % Check energy
-Ballbot.plotEnergy(t, qout_first_order, torque); 
+Ballbot.plotEnergy(t, z, torque); 
 
 % Animate ballbot
 Ballbot.animate(t, q,'HelloWorld_Ballbot.mp4'); 

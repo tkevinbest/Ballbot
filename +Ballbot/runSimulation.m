@@ -1,31 +1,31 @@
-function [tout, qout, qdotOut, qout_first_order, torque] = runSimulation(q0, qdot0, torqueFuncHandle, tspan, plotIt)
+function [tout, qout, qdotOut, z, torque] = runSimulation(q0, qdot0, torqueFuncHandle, tspan, plotIt)
 q0_firstOrder = interleave2(q0, qdot0, 'row');
-[tout, qout_first_order] = ode45(@(t,q)ballbotPlanarODE(t,q,torqueFuncHandle), tspan, q0_firstOrder);
+[tout, z] = ode45(@(t,q)ballbotPlanarODE(t,q,torqueFuncHandle), tspan, q0_firstOrder);
 
-qout = [qout_first_order(:,1),qout_first_order(:,3)];
-qdotOut = [qout_first_order(:,2),qout_first_order(:,4);];
+qout = [z(:,1),z(:,3)];
+qdotOut = [z(:,2),z(:,4);];
 
 % Recover input trajectory
 torque = zeros(size(tout)); 
 for ix = 1:length(tout)
-    torque(ix) = torqueFuncHandle(tout(ix), qout(ix,:)); 
+    torque(ix) = torqueFuncHandle(tout(ix), z(ix,:)'); 
 end
 
 if plotIt
-    Ballbot.plotTrajectories(tout, qout_first_order, torque); 
+    Ballbot.plotTrajectories(tout, z, torque); 
 end
 
 
 end
 
 
-function qdot_firstOrder = ballbotPlanarODE(t,q_firstOrder, torqueFuncHandle)
+function qdot_firstOrder = ballbotPlanarODE(t,z, torqueFuncHandle)
 % Extract the states
-q = [q_firstOrder(1);q_firstOrder(3)];
-qdot = [q_firstOrder(2);q_firstOrder(4);];
+q = [z(1);z(3)];
+qdot = [z(2);z(4);];
 
 % Get control torque
-T = torqueFuncHandle(t, q); 
+T = torqueFuncHandle(t, z); 
 
 M = Ballbot.M(q);
 f = Ballbot.f(q, qdot, T); 

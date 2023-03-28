@@ -33,8 +33,8 @@ solveTime = toc;
 disp(['MS Optimization with ', num2str(N),' nodes completed in ',num2str(solveTime,'%.2f'),' seconds.'])
 
 % Call plot
-qout_first_order = interleave2(qstar, qdotstar, 'row'); 
-Ballbot.plotTrajectories(tstar, qout_first_order', ustar); 
+z = interleave2(qstar, qdotstar, 'row'); 
+Ballbot.plotTrajectories(tstar, z', ustar); 
 
 % Animate ballbot
 Ballbot.animate(tstar, qstar','MultipleShootingTest_mex.mp4'); 
