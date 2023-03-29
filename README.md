@@ -1,7 +1,7 @@
 # Ballbot
 This repo contains the dynamics, simulation, and control code for a planar ballbot system. A ballbot is a robot that balances atop a basketball and rolls the basketball underneath it in order to move about the world. Though similar to a segway, the ballbot is a particularly challenging system to control because its center of mass is significantly above the ball. This makes the dynamics more similar to an inverted pendulum on a cart. 
 
-This code was developed for a class project in Applied Optimal Control taught by Dr. Christian Hubicki in Fall 2023. The course was offered remotely to Florida A&M / Florida State Univerisity students and remotely to University of Michigan students. 
+This code was developed for a class project in Applied Optimal Control taught by Dr. Christian Hubicki in Fall 2023. The course was offered in person to Florida A&M / Florida State Univerisity students and remotely to University of Michigan students. 
 
 The dynamics and modeling theory for this project was inspired by the Bachelor's Thesis by Fankhauser and Gwerder [1]. 
 
