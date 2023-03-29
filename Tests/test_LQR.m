@@ -38,9 +38,15 @@ forceFunc = @(t,z) -k*z;
 % Run simulation
 [t, q, qdot] = Ballbot.runSimulation(q0, qdot0, forceFunc, t_sim, true); 
 
-
 %% Animate the solution
 Ballbot.animate(t_sim, q, 'TestLQR.mp4');
+
+%% Validate the solution using lsim
+sys = ss(A_dyn-B_dyn*k, [0;0;0;0], eye(4),0);
+[y,tout] = lsim(sys, zeros(size(t_sim)), t_sim, interleave2(q0, qdot0,'row'));
+figure
+plot(t,y);
+
 
 
 
