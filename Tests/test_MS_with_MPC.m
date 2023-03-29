@@ -7,14 +7,14 @@ close all
 desX = 1.25;
 
 % Number of nodes
-N = 11; 
+N = 26; 
 
 % Constraints on states
 qLim = [
         -5/rk, 1.5/rk;
-        -deg2rad(15), deg2rad(15)
+        -deg2rad(30), deg2rad(30)
     ];
-qdotLim = [
+qdotLim = 5*[
         -15, 15;
         -2, 2
     ];
@@ -39,7 +39,7 @@ zstar = interleave2(qstar, qdotstar, 'row');
 
 %% Run MPC around nominal trajectory
 % Configure controller
-dt = 0.05; % Real time sample rate
+dt = 0.025; % Real time sample rate
 timeHorizon = 2; 
 
 % Configure simulation
@@ -70,7 +70,9 @@ for ix = 1:length(t_sim)
     % Solve optimal control
     Q = diag([10, 1, .5,.5])*eye(4); 
     R = 1; 
+    tic;
     u = Control.MPC.run(Q, R, ztilde, curTime, MPCconfig); 
+    mpcTime(ix) = toc;
 
     % Run simulation with said control 
     forceFunc = @(t,z) u + ustarTraj(ix); 
@@ -82,9 +84,11 @@ for ix = 1:length(t_sim)
     z0 = z(end,:)';
 
     % Store the trajectories
-    u_store(ix) = u; 
+    u_store(ix) = u + ustarTraj(ix); 
     z_store(:,ix) = z(1,:)'; 
 end
+
+disp(['Avg. MPC Compute Time: ', num2str(mean(mpcTime)), ' s'   ])
 
 % Plot the trajectories
 Ballbot.plotTrajectories(t_sim, z_store', u_store); 
