@@ -17,11 +17,12 @@ for ix = 1:size(A,3)
     dZ(:,ix) = A(:,:,ix)*zN(:,ix) + B(:,:,ix)*uN(:,ix); 
 end
 
-% Define defect constraints through explicit Euler
+% Define defect constraints through trapezoidal integration
 zNext = zN(:, 2:end);
 zPrev = zN(:, 1:end-1); 
 dz_prev = dZ(:,1:end-1); 
-defect_constraints = reshape(zNext - zPrev - dz_prev * dt,[],1); 
+dz_next = dZ(:,2:end); 
+defect_constraints = reshape(zNext - zPrev - (dz_prev+dz_next)/2 * dt,[],1); 
 
 % Define initial condition constraint
 z0 = sym('z0',[num_states,1]);
