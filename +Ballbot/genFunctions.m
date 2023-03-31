@@ -103,7 +103,8 @@ zdot = [qdot(1); qddot(1); qdot(2); qddot(2)];
 
 A_lin_symb = jacobian(zdot, z); 
 B_lin_symb = jacobian(zdot, u); 
+F_lin_symb = zdot; 
 matlabFunction(A_lin_symb, 'File','./+Ballbot/A_lin_symb','Vars',{z, u}); 
 matlabFunction(B_lin_symb, 'File','./+Ballbot/B_lin_symb','Vars',{z, u}); 
-
+matlabFunction(F_lin_symb, 'File','./+Ballbot/F_lin_symb', 'Vars',{z,u});
 end

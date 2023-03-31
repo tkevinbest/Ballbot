@@ -1,4 +1,4 @@
-function MPCconfig = setup(dt, timeHorizon, zstar_traj, ustar_traj, t_trajectory)
+function MPCconfig = setup(dt, timeHorizon, t_trajectory, z0)
 MPCconfig.timeHorizon = timeHorizon;
 t_horizon = 0:dt:timeHorizon; 
 MPCconfig.N_horizon = length(t_horizon); 
@@ -12,15 +12,8 @@ if MPCconfig.N_horizon ~= Control.MPC.getNumPtsForGeneratedCode()
     disp('Done!')
 end
 
-% Get the linearized dynamics about desired trajectory
-for ix = 1:length(t_trajectory)
-    MPCconfig.A_dyn(:,:,ix) = Ballbot.A_lin_symb(zstar_traj(:,ix), ustar_traj(:,ix));
-    MPCconfig.B_dyn(:,:,ix) = Ballbot.B_lin_symb(zstar_traj(:,ix), ustar_traj(:,ix));
-end
-
-% Add an additional N_horizon on the end of the trajectory
-for ix = length(t_trajectory)+1:length(t_trajectory)+MPCconfig.N_horizon
-    MPCconfig.A_dyn(:,:,ix) = Ballbot.A_lin_symb(zstar_traj(:,end), ustar_traj(:,end));
-    MPCconfig.B_dyn(:,:,ix) = Ballbot.B_lin_symb(zstar_traj(:,end), ustar_traj(:,end));
-end
+% Estimate the expected state and control trajectories for the upcoming
+% horizon
+MPCconfig.zTrajExpected = repmat(z0, 1, MPCconfig.N_horizon);
+MPCconfig.uTrajExpected = repmat(0, 1, MPCconfig.N_horizon);
 end
