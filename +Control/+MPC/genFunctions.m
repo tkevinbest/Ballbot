@@ -44,6 +44,16 @@ ic_constraint = zN(:,1) - z0;
 % Group all equality constraints
 equality_constraints = [defect_constraints; ic_constraint]; 
 
+% Inequality constraints
+zLim = sym('zLim', [num_states, 2]);
+uLim = sym('uLim', [num_inputs, 2]); 
+
+stateLowerLimits = reshape(zLim(:,1) - zN,[],1);
+stateUpperLimits = reshape(zN - zLim(:,2), [],1); 
+torqueLowerLimits = reshape(uLim(:,1) - uN, [],1); 
+torqueUpperLimits = reshape(uN - uLim(:,2), [],1); 
+inequality_constraints = [stateLowerLimits; stateUpperLimits; torqueLowerLimits; torqueUpperLimits]; 
+
 % Define cost function - just squared error for now
 Q = sym('Q',[num_states, num_states]);
 R = sym('R',[num_inputs, num_inputs]);
@@ -66,12 +76,16 @@ H = hessian(J, x);
 c = subs(jacobian(J,x),x, zeros(size(x)))'; 
 Aeq = jacobian(equality_constraints, x); 
 beq = -subs(equality_constraints, x, zeros(size(x))); 
+A = jacobian(inequality_constraints, x); 
+b = -subs(inequality_constraints, x, zeros(size(x))); 
 
 % Export matlab functions
 matlabFunction(H, 'File', './+Control/+MPC/H_func', 'Vars', {Q, R, T_horizon, zN_des, uN_des});
 matlabFunction(c, 'File', './+Control/+MPC/c_func', 'Vars', {Q, R, T_horizon, zN_des, uN_des});
 matlabFunction(Aeq, 'File', './+Control/+MPC/Aeq_func', 'Vars', {zN_exp, uN_exp, T_horizon});
 matlabFunction(beq, 'File', './+Control/+MPC/beq_func', 'Vars', {zN_exp, uN_exp, z0, T_horizon});
+matlabFunction(A, 'File', './+Control/+MPC/A_func', 'Vars',{zLim, uLim});
+matlabFunction(b, 'File', './+Control/+MPC/b_func', 'Vars',{zLim, uLim});
 matlabFunction(uN_extracted,'File', './+Control/+MPC/extract_uN_from_DV', 'Vars', {x});
 matlabFunction(zN_extracted,'File', './+Control/+MPC/extract_zN_from_DV', 'Vars', {x});
 matlabFunction(subs(N_horizon_pts_out, N_horizon_pts_out, N_horizon_pts),'File', './+Control/+MPC/getNumPtsForGeneratedCode');

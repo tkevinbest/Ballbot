@@ -4,7 +4,7 @@ close all
 [mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 % Desired X position
-desX = 1.0;
+desX = .20;
 
 % Define desired states
 qdes = [desX/rk;0];
@@ -23,7 +23,7 @@ dt = 0.05; % Real time sample rate
 timeHorizon = 3; 
 
 % Configure simulation
-T_simulation = 4; % Length of the simulation
+T_simulation = 3; % Length of the simulation
 t_sim = 0:dt:T_simulation; 
 N_sim = length(t_sim); 
 
@@ -46,7 +46,7 @@ for ix = 1:length(t_sim)
     uDesiredTraj = repmat(uDesired, 1, MPCconfig.N_horizon); 
 
     % Solve optimal control
-    Q = diag([10, 1, .5,.5]); 
+    Q = diag([50, 1, 50,.5]); 
     R = 1; 
     [curU, zstar, ustar, MPCconfig] = Control.MPC.run(Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig); 
 

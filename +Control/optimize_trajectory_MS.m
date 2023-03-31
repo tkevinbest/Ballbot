@@ -6,7 +6,12 @@ consts.qf = qdes;
 consts.qdotf = qdot_des; 
 
 % Grab constraints from file
-[qlim, qdotlim, ulim] = Ballbot.defineConstraints();
+[qlim, qdotlim, ulim] = Ballbot.defineConstraints(Control.OptimizationType.MS);
+
+% Make constraints more conservative for initial TO
+qlim = .9*qlim;
+qdotlim = .9*qdotlim;
+ulim = .9*ulim; 
 
 % Define initial guess for decision vector
 % Handle nan cases for unspecified final conditions
