@@ -9,17 +9,6 @@ desX = 1.0;
 % Number of nodes
 N = 26; 
 
-% Constraints on states
-qLim = [
-        -5/rk, 1.5/rk;
-        -deg2rad(30), deg2rad(30)
-    ];
-qdotLim = 5*[
-        -15, 15;
-        -2, 2
-    ];
-uLim = [-10, 10]; 
-
 % Obstacles
 
 %% Run Multiple Shooting Trajectory Optimization
@@ -32,7 +21,7 @@ qdot_des = [0; 0];
 
 tic
 [ustar, qstar, qdotstar, tstar, Tfstar, finalCost, fminconout] = ...
-        Control.optimize_trajectory_MS_mex(q0, qdot0, qdes, qdot_des, N, qLim, qdotLim, uLim);
+        Control.optimize_trajectory_MS_mex(q0, qdot0, qdes, qdot_des, N);
 solveTime = toc;
 disp(['MS Optimization with ', num2str(N),' nodes completed in ',num2str(solveTime,'%.2f'),' seconds.'])
 zstar = interleave2(qstar, qdotstar, 'row'); 
