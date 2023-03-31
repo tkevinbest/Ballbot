@@ -1,9 +1,12 @@
 function [ustar, qstar, qdotstar, tstar, Tfstar, finalCost, fminconout] ...
-            = optimize_trajectory_MS(q0, qdot0, qdes, qdot_des, N, qlim, qdotlim, ulim)
+            = optimize_trajectory_MS(q0, qdot0, qdes, qdot_des, N)
 consts.q0 = q0;
 consts.qdot0 = qdot0;
 consts.qf = qdes;
 consts.qdotf = qdot_des; 
+
+% Grab constraints from file
+[qlim, qdotlim, ulim] = Ballbot.defineConstraints();
 
 % Define initial guess for decision vector
 % Handle nan cases for unspecified final conditions
