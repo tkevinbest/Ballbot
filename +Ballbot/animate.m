@@ -1,9 +1,14 @@
-function animate(t, q, videoName)
+function animate(t, q, videoName, pObs, rObs)
 % Adapted from class code
 if ~exist('videoName','var')
     saveVideo = false;
 else
     saveVideo = true; 
+end
+
+if ~exist('pObs', 'var')
+    pObs = [];
+    rObs = [];
 end
 
 
@@ -30,7 +35,7 @@ f = figure(); % Create new figure for animation
 set(f,'outerposition',[89 177 1024 1024]) % Set its size and pos.
 set(f,'color',[0.8 0.9 1])
 for iter = 1:numel(t_anim)
-    drawBallbot(q_anim(iter,:), f);  
+    drawBallbot(q_anim(iter,:), f, pObs, rObs);  
     if saveVideo
         frame = getframe(gcf);
         writeVideo(v,frame);
@@ -44,7 +49,7 @@ end
 end
 
 
-function drawBallbot(q, f)
+function drawBallbot(q, f, pObs, rObs)
 phi = q(1);
 theta = q(2); 
 
@@ -85,6 +90,12 @@ pendulumTransformed = rotmat(-theta) * bodyBar + wheelCenter;
 fill(pendulumTransformed(1,:), pendulumTransformed(2,:),barColor)
 COMcenter = wheelCenter + barLength * [sin(theta); cos(theta)];
 drawCOM(theta, COMcenter, [.5, .5, .5], wheelRadius/3); 
+
+% Draw an obstacle
+if ~isempty(pObs)
+    colorize_circle(0, pObs, 'k', rObs);
+    colorize_circle(pi/4, pObs, 'k', rObs);
+end
 
 axis equal
 axis([-1 1.5 -.025 1])

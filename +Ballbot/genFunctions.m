@@ -6,11 +6,16 @@ function genFunctions()
 % Load relevant ballbot params
 [mk, mw, ma, rk, rw, ra, l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
-syms t
-syms phix(t) phiz(t)
-syms thetax(t) thetaz(t)
-syms psiz(t)
-syms Tx
+syms t real
+syms phix(t) phiz(t) 
+assumeAlso(phix(t),'real')
+assumeAlso(phiz(t) ,'real')
+syms thetax(t) thetaz(t) 
+assumeAlso(thetax(t),'real')
+assumeAlso(thetaz(t) ,'real')
+syms psiz(t) 
+assumeAlso(psiz(t) ,'real')
+syms Tx real
 phidotx = diff(phix,t);
 phidotz = diff(phiz,t);
 thetadotx = diff(thetax,t);
@@ -58,7 +63,7 @@ dL_d_qdot = jacobian(L,qdot).';
 EL_eq = diff(dL_d_qdot,t) - jacobian(L,q).' - Fnp; 
 
 % Substitutions to eliminate dependence on t and diffs
-syms ddthetax_ ddphix_ dthetax_ dphix_ thetax_ phix_ 
+syms ddthetax_ ddphix_ dthetax_ dphix_ thetax_ phix_ real
 EL_eq = subs(EL_eq, {diff(thetax(t),t,t), diff(phix(t),t,t)}, {ddthetax_, ddphix_});
 EL_eq = subs(EL_eq, {diff(thetax(t),t), diff(phix(t),t)}, {dthetax_, dphix_});
 EL_eq = subs(EL_eq, {thetax(t), phix(t)}, {thetax_, phix_});
@@ -90,10 +95,10 @@ matlabFunction(Va_subsd, 'File','./+Ballbot/Va','Vars',argumentVars);
 
 
 % Calculate linearized dynamics
-z = sym('z',[4;1]);
+z = sym('z',[4;1], 'real');
 q = [z(1); z(3)];
 qdot = [z(2); z(4)];
-u = sym('u',[1;1]); 
+u = sym('u',[1;1], 'real'); 
 
 % Define linearized dynamics
 M = Ballbot.M(q,0); 
@@ -107,4 +112,15 @@ F_lin_symb = zdot;
 matlabFunction(A_lin_symb, 'File','./+Ballbot/A_lin_symb','Vars',{z, u}); 
 matlabFunction(B_lin_symb, 'File','./+Ballbot/B_lin_symb','Vars',{z, u}); 
 matlabFunction(F_lin_symb, 'File','./+Ballbot/F_lin_symb', 'Vars',{z,u});
+
+% Calculate distance from COM to a point
+p = sym('p',[2,1], 'real');
+pCoM = Ballbot.calcCOM_location(q); 
+dCoM_to_Point = symVecNorm(p-pCoM); 
+d_dCoM_to_Point_dz = jacobian(dCoM_to_Point, z); 
+matlabFunction(dCoM_to_Point, 'File','./+Ballbot/calcDistFrom_CoM','Vars',{z, p}); 
+matlabFunction(d_dCoM_to_Point_dz, 'File','./+Ballbot/calcDistFrom_CoM_jacobian','Vars',{z, p}); 
+
+
+
 end

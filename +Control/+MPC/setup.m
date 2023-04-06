@@ -1,13 +1,13 @@
-function MPCconfig = setup(dt, timeHorizon, t_trajectory, z0)
+function MPCconfig = setup(N_horizon, timeHorizon, t_trajectory, z0)
 MPCconfig.timeHorizon = timeHorizon;
-t_horizon = 0:dt:timeHorizon; 
-MPCconfig.N_horizon = length(t_horizon); 
+MPCconfig.N_horizon = N_horizon; 
 MPCconfig.dt_NominalTrajectory = mode(diff(t_trajectory)); 
 
 % Configure MPC functions
 if MPCconfig.N_horizon ~= Control.MPC.getNumPtsForGeneratedCode()
-    disp('Horizon changed -> Generating MPC Functions')
+    disp('Horizon nodes changed -> Generating MPC Functions')
     Control.MPC.genFunctions(MPCconfig.N_horizon); 
+    pause(5); % Pause to make sure all functions are done writing
     rehash % Makes sure new functions are loaded before use
     disp('Done!')
 end
