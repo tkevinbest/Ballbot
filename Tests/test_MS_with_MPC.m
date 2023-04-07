@@ -10,7 +10,7 @@ desX = 1.0;
 N = 26; 
 
 % Define obstacle
-pObs = [.0;.58];
+pObs = [.25;.5];
 rObs = .1;
 
 %% Run Multiple Shooting Trajectory Optimization
@@ -28,31 +28,34 @@ solveTime = toc;
 disp(['MS Optimization with ', num2str(N),' nodes completed in ',num2str(solveTime,'%.2f'),' seconds.'])
 zPlan = interleave2(qstar, qdotstar, 'row'); 
 
+% Call plot
+z = interleave2(qstar, qdotstar, 'row'); 
+Ballbot.plotTrajectories(tstar, zPlan', uPlan); 
+
+% Animate ballbot
+Ballbot.animate(tstar, qstar'); 
+figure()
+
 %% Run MPC around nominal trajectory
 % Configure controller
 dt = 0.01; % Real time sample rate
-timeHorizon = 2.5; 
-N_horizon = 51; % Nodes
-t_horizon = 0:dt:timeHorizon; 
+timeHorizon = 2.25; 
+N_horizon = 26; % Nodes
+t_horizon = linspace(0, timeHorizon, N_horizon); 
 
 % Configure simulation
-T_simulation = max(tstar)+.1; % Length of the simulation
+T_simulation = max(tstar)+1; % Length of the simulation
 t_sim = 0:dt:T_simulation; 
 N_sim = length(t_sim); 
 
-% Convert desired points to trajectories
-zstarTraj = interp1(tstar', zPlan', t_sim')'; 
-ustarTraj = interp1(tstar', uPlan', t_sim')'; 
-indicesBeyondPlan = any(isnan(zstarTraj)); 
-zstarTraj(:,indicesBeyondPlan) = repmat(zPlan(:,end),1,sum(indicesBeyondPlan));
-ustarTraj(:,indicesBeyondPlan) = repmat(uPlan(end),1,sum(indicesBeyondPlan));
-
 % Configure MPC 
-MPCconfig = Control.MPC.setup(N_horizon, timeHorizon, t_sim, z0);
-
-% Add horizon's length buffer to the end of the trajectory
-zstarTraj = [zstarTraj, repmat(zstarTraj(:,end),1,MPCconfig.N_horizon)];
-ustarTraj = [ustarTraj, repmat(zeros(size(ustarTraj(:,end))),1,MPCconfig.N_horizon)];
+% Calculate expected trajectory for the first iteration
+zDesiredTraj_thisHorizon = interp1(tstar', zPlan', t_horizon)';
+uDesiredTraj_thisHorizon = interp1(tstar', uPlan', t_horizon);
+indicesBeyondPlan = any(isnan(zDesiredTraj_thisHorizon)); 
+zDesiredTraj_thisHorizon(:,indicesBeyondPlan) = repmat(zPlan(:,end),1,sum(indicesBeyondPlan));
+uDesiredTraj_thisHorizon(indicesBeyondPlan) = repmat(uPlan(end),1,sum(indicesBeyondPlan));
+MPCconfig = Control.MPC.setup(N_horizon, timeHorizon, t_sim, zDesiredTraj_thisHorizon, uDesiredTraj_thisHorizon);
 
 % Allocate space to save off the trajectory
 u_store = zeros(1, length(t_sim)); 
@@ -63,19 +66,22 @@ mpcTime = zeros(length(t_sim),1);
 curZ = z0; 
 zstarHist = [];
 ustarHist = [];
+tHist = [];
 for ix = 1:length(t_sim)
     % Get the current time
     curTime = t_sim(ix); 
 
-    % Grab current section of desired trajectory
-    % For a constant setpoint, just repeat desired 
+    % Calculate nominal trajectories at each horizon point
+    zDesiredTraj_thisHorizon = interp1(tstar', zPlan', curTime + t_horizon)';
+    uDesiredTraj_thisHorizon = interp1(tstar', uPlan', curTime + t_horizon);
+    indicesBeyondPlan = any(isnan(zDesiredTraj_thisHorizon)); 
+    zDesiredTraj_thisHorizon(:,indicesBeyondPlan) = repmat(zPlan(:,end),1,sum(indicesBeyondPlan));
+    uDesiredTraj_thisHorizon(indicesBeyondPlan) = repmat(uPlan(end),1,sum(indicesBeyondPlan));
 
-    zDesiredTraj_thisHorizon = zstarTraj(:,ix:ix+MPCconfig.N_horizon-1); 
-    uDesiredTraj_thisHorizon = ustarTraj(:,ix:ix+MPCconfig.N_horizon-1); 
 
     % Solve optimal control
-    Q = diag([10, 0, 1,0]); 
-    R = .02; 
+    Q = diag([200, 0, 1,0]); 
+    R = .2; 
     tic
     [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, ...
                                                         zDesiredTraj_thisHorizon, ...
@@ -87,7 +93,7 @@ for ix = 1:length(t_sim)
     mpcTime(ix) = toc;
 
     % Run simulation with said control 
-    forceFunc = @(t,z) curU; %*(rand()*.2 + .9); 
+    forceFunc = @(t,z) curU ;
     q0 = curZ([1,3],:);
     qdot0 = curZ([2,4],:);
     [t,q, qdot, z, ~] = Ballbot.runSimulation(q0, qdot0, forceFunc, curTime + [0,dt], false);
@@ -100,8 +106,8 @@ for ix = 1:length(t_sim)
     z_store(:,ix) = z(1,:)'; 
 
     % Plot progress
-    % Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
-    % drawnow; 
+%     Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
+%     drawnow; 
 
     if MPCfailed
         t_sim = t_sim(1:ix-1); 

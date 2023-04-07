@@ -4,7 +4,7 @@ close all
 [mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 % Desired X position
-desX = 1;
+desX = 1.;
 
 % Define desired states
 qdes = [desX/rk;0];
@@ -13,28 +13,30 @@ zDesired = interleave2(qdes, qdot_des, 'row');
 uDesired = 0;
 
 % Define initial conditions
-q0 = [0;0];
+q0 = [-.6/rk;0];
 qdot0 = [0;0];
 z0 = interleave2(q0, qdot0, 'row'); 
 
 % Define obstacle
-pObs = [.5;.56];
+pObs = [.25;.54];
 rObs = .1;
 
 %% Run MPC around nominal state
 % Configure controller
-dt = 0.01; % Real time sample rate
-timeHorizon = 3.5; 
-N_horizon = 61; % Nodes
+dt = 0.005; % Real time sample rate
+timeHorizon = 1; 
+N_horizon = 26; % Nodes
 t_horizon = linspace(0, timeHorizon, N_horizon); 
 
 % Configure simulation
-T_simulation = 4; % Length of the simulation
+T_simulation = 3; % Length of the simulation
 t_sim = 0:dt:T_simulation; 
 N_sim = length(t_sim); 
 
 % Configure MPC 
-MPCconfig = Control.MPC.setup(N_horizon, timeHorizon, t_sim, z0);
+zExpected = repmat(z0, 1, N_horizon); 
+uExpected = zeros(1,N_horizon); 
+MPCconfig = Control.MPC.setup(N_horizon, timeHorizon, t_sim, zExpected, uExpected);
 
 % Allocate space to save off the trajectory
 u_store = NaN(1, length(t_sim)); 
@@ -54,8 +56,8 @@ for ix = 1:length(t_sim)
     uDesiredTraj = repmat(uDesired, 1, MPCconfig.N_horizon); 
 
     % Solve optimal control
-    Q = diag([200, 0,1,0]); 
-    R = .5; 
+    Q = diag([50, 0,10,0]); 
+    R = .15; 
     [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig, pObs, rObs);
 
     zstarHist(:,:,ix) = zstar; 
@@ -75,16 +77,16 @@ for ix = 1:length(t_sim)
     u_store(ix) = curU; 
     z_store(:,ix) = z(1,:)'; 
 
-    % Plot progress
+%     Plot progress
 %     Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
 %     drawnow; 
 
-    if MPCfailed
-        t_sim = t_sim(1:ix-1); 
-        z_store = z_store(:,1:ix-1); 
-        u_store = u_store(1:ix-1); 
-        break;
-    end
+%     if MPCfailed
+%         t_sim = t_sim(1:ix-1); 
+%         z_store = z_store(:,1:ix-1); 
+%         u_store = u_store(1:ix-1); 
+%         break;
+%     end
 end
 
 % Plot the trajectories

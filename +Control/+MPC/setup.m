@@ -1,4 +1,4 @@
-function MPCconfig = setup(N_horizon, timeHorizon, t_trajectory, z0)
+function MPCconfig = setup(N_horizon, timeHorizon, t_trajectory, zExpected, uExpected)
 MPCconfig.timeHorizon = timeHorizon;
 MPCconfig.N_horizon = N_horizon; 
 MPCconfig.dt_NominalTrajectory = mode(diff(t_trajectory)); 
@@ -14,6 +14,6 @@ end
 
 % Estimate the expected state and control trajectories for the upcoming
 % horizon
-MPCconfig.zTrajExpected = repmat(z0, 1, MPCconfig.N_horizon);
-MPCconfig.uTrajExpected = repmat(0, 1, MPCconfig.N_horizon);
+MPCconfig.zTrajExpected = zExpected;
+MPCconfig.uTrajExpected = uExpected;
 end

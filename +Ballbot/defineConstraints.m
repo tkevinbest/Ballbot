@@ -14,12 +14,12 @@ switch type
         uLim = [-10, 10]; 
     case Control.OptimizationType.MPC
         qLim = [
-                -20/rk, 20/rk;
+                -3/rk, 3/rk;
                 -deg2rad(90), deg2rad(90)
             ];
-        qdotLim = 100*[
-                -15, 15;
-                -2, 2
+        qdotLim = [
+                -500, 500;
+                -20, 20
             ];
         uLim = 20*[-20, 20]; 
 end

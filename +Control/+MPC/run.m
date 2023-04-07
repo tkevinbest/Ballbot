@@ -15,7 +15,7 @@ zLim = interleave2(qLim, qdotLim, 'row');
     MPCconfig.zTrajExpected, MPCconfig.uTrajExpected, zLim, uLim,...
     pObs, rObs...
     );
-options = optimoptions("quadprog","Display","none", 'ConstraintTolerance',1e-8);
+options = optimoptions("quadprog","Display","final");
 [xtildestar, fval, exitFlag, output] = quadprog(H, c, A, b, Aeq, beq, [],[],[],options); 
 if exitFlag < 0
     xtildestar = zeros(Control.MPC.get_N_decisionVars(),1);

@@ -9,14 +9,15 @@ syms N_horizon_pts_out real
 % Decision variables
 zN = sym('zN',[num_states, N_horizon_pts], 'real');
 uN = sym('uN', [num_inputs, N_horizon_pts], 'real');
+lambda = sym('lambdaN_', [num_states, 1], 'real');
 
 % Define the decision vector 
-x = [uN(:); zN(:)];
+x = [uN(:); zN(:); lambda(:)];
 syms N_decision_vars;
 
 % Define how to extract from the decision vector
 uN_extracted = x(1:N_horizon_pts); 
-zN_extracted = reshape(x(N_horizon_pts + 1:end), num_states, []); 
+zN_extracted = reshape(x(N_horizon_pts + 1:end-num_states), num_states, []); 
 
 % Desired and expected trajectories
 zN_des = sym('zN_des',[num_states, N_horizon_pts], 'real');
@@ -49,8 +50,11 @@ defect_constraints = reshape(zNext - zPrev - (dz_prev + dz_next) * dt/2.0,[],1);
 z0 = sym('z0',[num_states,1], 'real');
 ic_constraint = zN(:,1) - z0; 
 
+% Define terminal condition constraint
+tf_constraint = zN(:,end) - zN_des(:,end) - lambda; 
+
 % Group all equality constraints
-equality_constraints = [defect_constraints; ic_constraint]; 
+equality_constraints = [defect_constraints; ic_constraint; tf_constraint]; 
 
 % Obstacle Constraints
 pObs = sym('pObs',[2,1], 'real');
@@ -71,7 +75,7 @@ for ix = 1:N_horizon_pts
     approximateCoMLocation = Ballbot.calcCOM_location(curqNominal) + ...
                              subs(BallbotCoMJac, q, curqNominal) * (curqActual - curqNominal);
     trueCoMLocation = Ballbot.calcCOM_location(curqActual);
-    heightLimit = pObs(2)-rObs + 2*(trueCoMLocation(1)-pObs(1))^2;
+    heightLimit = pObs(2)-rObs + 20*(trueCoMLocation(1)-pObs(1))^2;
     heightLimit_approx = subs(heightLimit, curqActual, curqNominal) + subs(jacobian(heightLimit,curqActual), curqActual, curqNominal) * (curqActual - curqNominal); 
     obstacleConstraint(ix) = approximateCoMLocation(2) - heightLimit_approx; 
 end
@@ -87,7 +91,9 @@ stateLowerLimits = reshape(zLim(:,1) - zN(:,2:end),[],1);
 stateUpperLimits = reshape(zN(:,2:end) - zLim(:,2), [],1); 
 torqueLowerLimits = reshape(uLim(:,1) - uN, [],1); 
 torqueUpperLimits = reshape(uN - uLim(:,2), [],1); 
-inequality_constraints = [stateLowerLimits; stateUpperLimits; torqueLowerLimits; torqueUpperLimits; obstacleConstraint(:)]; 
+inequality_constraints = [stateLowerLimits; stateUpperLimits; 
+    torqueLowerLimits; torqueUpperLimits;
+    obstacleConstraint(:)]; 
 
 
 % Define cost function - just squared error for now
@@ -98,7 +104,8 @@ uError = uN - uN_des;
 zN_error_flat = reshape(zError,[],1); 
 uN_error_flat = reshape(uError,[],1);
 J = zN_error_flat.'* kron(eye(N_horizon_pts), Q) * zN_error_flat + ...
-    uN_error_flat.'* kron(eye(N_horizon_pts), R) * uN_error_flat;
+    uN_error_flat.'* kron(eye(N_horizon_pts), R) * uN_error_flat + ...
+    10*lambda .' * eye(num_states) * lambda;
 
 % Calculate QP Matrices
 H = hessian(J, x); 
