@@ -4,19 +4,23 @@ function [u, zstar, ustar, MPCconfig, MPCfailed] = run(Q, R, curZ, zDesired, uDe
 zLim = interleave2(qLim, qdotLim, 'row');
 
 % Solve optimal control
-% H = Control.MPC.H_func(Q, R, MPCconfig.timeHorizon, zDesired, uDesired); 
-% c = Control.MPC.c_func(Q, R, MPCconfig.timeHorizon, zDesired, uDesired); 
-% Aeq = Control.MPC.Aeq_func(MPCconfig.zTrajExpected, MPCconfig.uTrajExpected, MPCconfig.timeHorizon); 
-% beq = Control.MPC.beq_func(MPCconfig.zTrajExpected, MPCconfig.uTrajExpected, curZ, MPCconfig.timeHorizon); 
-% A = Control.MPC.A_func(zLim, uLim, MPCconfig.zTrajExpected, pObs, rObs);
-% b = Control.MPC.b_func(zLim, uLim, MPCconfig.zTrajExpected, pObs, rObs); 
-[H, c, Aeq, beq, A, b] = Control.MPC.getQP_funcs( ...
+[H, c, H_PCC, c_PCC, Aeq, beq, A, b] = Control.MPC.getQP_funcs( ...
     Q, R, MPCconfig.timeHorizon, curZ, zDesired, uDesired, ...
     MPCconfig.zTrajExpected, MPCconfig.uTrajExpected, zLim, uLim,...
-    pObs, rObs...
+    pObs, rObs,...
+    MPCconfig.previousDV, 1 ...
     );
-options = optimoptions("quadprog","Display","final");
-[xtildestar, fval, exitFlag, output] = quadprog(H, c, A, b, Aeq, beq, [],[],[],options); 
+
+if MPCconfig.planMade
+    H_used = H_PCC;
+    c_used = c_PCC;
+else
+    H_used = H;
+    c_used = c;
+end
+
+options = optimoptions("quadprog","Display",'off');
+[xtildestar, fval, exitFlag, output] = quadprog(H_used, c_used, A, b, Aeq, beq, [],[],[],options); 
 if exitFlag < 0
     xtildestar = zeros(Control.MPC.get_N_decisionVars(),1);
     disp(['MPC Failed. Quadprog exit flag ',num2str(exitFlag)]);
@@ -32,6 +36,8 @@ u = ustar(1);
 % Update the expected trajectories
 MPCconfig.zTrajExpected = zstar;
 MPCconfig.uTrajExpected = ustar';
+MPCconfig.previousDV = xtildestar; 
+MPCconfig.planMade = true; 
 
 end
 

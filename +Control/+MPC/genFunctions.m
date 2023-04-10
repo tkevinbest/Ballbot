@@ -14,6 +14,7 @@ lambda = sym('lambdaN_', [num_states, 1], 'real');
 % Define the decision vector 
 x = [uN(:); zN(:); lambda(:)];
 syms N_decision_vars;
+xPrev = sym('xPrev_',size(x));
 
 % Define how to extract from the decision vector
 uN_extracted = x(1:N_horizon_pts); 
@@ -60,12 +61,8 @@ equality_constraints = [defect_constraints; ic_constraint; tf_constraint];
 pObs = sym('pObs',[2,1], 'real');
 syms rObs real;
 
-% Linearize top of pendulum location about expected trajectory
-% zN_ExcursionFromExpected = zN - zN_exp; 
-% for ix = 1:N_horizon_pts
-%     expectedDistToCoM = Ballbot.calcDistFrom_CoM(zN_exp(:,ix), pObs); 
-%     linearizedDistToCoM(ix,1) = expectedDistToCoM + Ballbot.calcDistFrom_CoM_jacobian(zN_exp(:,ix), pObs) * zN_ExcursionFromExpected(:,ix);
-% end
+% Create parabolic constraint to enforce maximum height underneath the
+% obstacle. 
 q = sym('q',[2,1]);
 BallbotCoMSymb = Ballbot.calcCOM_location(q); 
 BallbotCoMJac = jacobian(BallbotCoMSymb, q); 
@@ -103,13 +100,18 @@ zError = zN - zN_des;
 uError = uN - uN_des; 
 zN_error_flat = reshape(zError,[],1); 
 uN_error_flat = reshape(uError,[],1);
+syms mindChangeCost real
+planChangeCost = mindChangeCost*(x-xPrev).'*eye(length(xPrev)) * (x-xPrev); 
 J = zN_error_flat.'* kron(eye(N_horizon_pts), Q) * zN_error_flat + ...
     uN_error_flat.'* kron(eye(N_horizon_pts), R) * uN_error_flat + ...
     10*lambda .' * eye(num_states) * lambda;
+J_withPlanChangeCost = J + planChangeCost; 
 
 % Calculate QP Matrices
 H = hessian(J, x); 
+H_withPCC = hessian(J_withPlanChangeCost, x); 
 c = subs(jacobian(J,x),x, zeros(size(x))).'; 
+c_withPCC = subs(jacobian(J_withPlanChangeCost,x),x, zeros(size(x))).'; 
 Aeq = jacobian(equality_constraints, x); 
 beq = -subs(equality_constraints, x, zeros(size(x))); 
 A = jacobian(inequality_constraints, x); 
@@ -117,8 +119,8 @@ b = -subs(inequality_constraints, x, zeros(size(x)));
 
 % Export matlab functions
 simplifyAndWriteMatlabFunction( subs(N_horizon_pts_out, N_horizon_pts_out, N_horizon_pts),'File', './+Control/+MPC/getNumPtsForGeneratedCode');
-matlabFunction(H, c, Aeq, beq, A, b, 'File', './+Control/+MPC/getQP_funcs', 'Vars',{Q, R, T_horizon, z0, zN_des, uN_des,zN_exp, uN_exp, zLim, uLim, pObs, rObs},...
-    "Outputs",{'H','c','Aeq','beq','A','b'},'Sparse',true, 'Optimize',false);
+matlabFunction(H, c, H_withPCC, c_withPCC, Aeq, beq, A, b, 'File', './+Control/+MPC/getQP_funcs', 'Vars',{Q, R, T_horizon, z0, zN_des, uN_des,zN_exp, uN_exp, zLim, uLim, pObs, rObs, xPrev, mindChangeCost},...
+    "Outputs",{'H','c', 'H_withPCC', 'c_withPCC', 'Aeq','beq','A','b'},'Sparse',true, 'Optimize',false);
 simplifyAndWriteMatlabFunction(uN_extracted,'File', './+Control/+MPC/extract_uN_from_DV', 'Vars', {x});
 simplifyAndWriteMatlabFunction(zN_extracted,'File', './+Control/+MPC/extract_zN_from_DV', 'Vars', {x});
 matlabFunction(subs(N_decision_vars, N_decision_vars, length(x)),'File', './+Control/+MPC/get_N_decisionVars');

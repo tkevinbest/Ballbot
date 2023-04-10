@@ -18,14 +18,14 @@ qdot0 = [0;0];
 z0 = interleave2(q0, qdot0, 'row'); 
 
 % Define obstacle
-pObs = [.25;.54];
+pObs = [.25;.55];
 rObs = .1;
 
 %% Run MPC around nominal state
 % Configure controller
 dt = 0.005; % Real time sample rate
-timeHorizon = 1; 
-N_horizon = 26; % Nodes
+timeHorizon = 2.5; 
+N_horizon = 51; % Nodes
 t_horizon = linspace(0, timeHorizon, N_horizon); 
 
 % Configure simulation
@@ -56,8 +56,8 @@ for ix = 1:length(t_sim)
     uDesiredTraj = repmat(uDesired, 1, MPCconfig.N_horizon); 
 
     % Solve optimal control
-    Q = diag([50, 0,10,0]); 
-    R = .15; 
+    Q = diag([50, 1,5,1]); 
+    R = 1; 
     [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig, pObs, rObs);
 
     zstarHist(:,:,ix) = zstar; 
@@ -81,12 +81,12 @@ for ix = 1:length(t_sim)
 %     Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
 %     drawnow; 
 
-%     if MPCfailed
-%         t_sim = t_sim(1:ix-1); 
-%         z_store = z_store(:,1:ix-1); 
-%         u_store = u_store(1:ix-1); 
-%         break;
-%     end
+    if MPCfailed
+        t_sim = t_sim(1:ix-1); 
+        z_store = z_store(:,1:ix-1); 
+        u_store = u_store(1:ix-1); 
+        break;
+    end
 end
 
 % Plot the trajectories

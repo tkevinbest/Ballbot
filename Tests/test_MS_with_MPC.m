@@ -34,17 +34,16 @@ Ballbot.plotTrajectories(tstar, zPlan', uPlan);
 
 % Animate ballbot
 Ballbot.animate(tstar, qstar'); 
-figure()
 
 %% Run MPC around nominal trajectory
 % Configure controller
 dt = 0.01; % Real time sample rate
-timeHorizon = 2.25; 
-N_horizon = 26; % Nodes
+timeHorizon = 3; 
+N_horizon = 51; % Nodes
 t_horizon = linspace(0, timeHorizon, N_horizon); 
 
 % Configure simulation
-T_simulation = max(tstar)+1; % Length of the simulation
+T_simulation = max(tstar)+3; % Length of the simulation
 t_sim = 0:dt:T_simulation; 
 N_sim = length(t_sim); 
 
@@ -80,8 +79,8 @@ for ix = 1:length(t_sim)
 
 
     % Solve optimal control
-    Q = diag([200, 0, 1,0]); 
-    R = .2; 
+    Q = diag([50, 1,5,1]); 
+    R = 1; 
     tic
     [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, ...
                                                         zDesiredTraj_thisHorizon, ...
@@ -120,6 +119,7 @@ end
 disp(['Avg. MPC Compute Time: ', num2str(mean(mpcTime)), ' s'   ])
 
 % Plot the trajectories
+figure()
 Ballbot.plotTrajectories(t_sim, z_store', u_store); 
 
 %% Animate the solution

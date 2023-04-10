@@ -16,4 +16,6 @@ end
 % horizon
 MPCconfig.zTrajExpected = zExpected;
 MPCconfig.uTrajExpected = uExpected;
+MPCconfig.previousDV = zeros(Control.MPC.get_N_decisionVars,1);
+MPCconfig.planMade = false; 
 end
