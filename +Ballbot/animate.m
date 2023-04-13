@@ -89,13 +89,18 @@ bodyBar = [barThickness/2 * [-1, 1, 1, -1];
 pendulumTransformed = rotmat(-theta) * bodyBar + wheelCenter;
 fill(pendulumTransformed(1,:), pendulumTransformed(2,:),barColor)
 COMcenter = wheelCenter + barLength * [sin(theta); cos(theta)];
-drawCOM(theta, COMcenter, [.5, .5, .5], wheelRadius/3); 
+rCoM = wheelRadius/3;
+drawCOM(theta, COMcenter, [.5, .5, .5], rCoM); 
 
 % Draw an obstacle
 if ~isempty(pObs)
-    colorize_circle(0, pObs, 'k', rObs);
-    colorize_circle(pi/4, pObs, 'k', rObs);
+    colorize_circle(0, pObs, 'k', rObs-rCoM);
+    colorize_circle(pi/4, pObs, 'k', rObs-rCoM);
+
+    % Draw outer safety zone on obstacle
+    draw_circle(pObs(1), pObs(2),rObs, [.5,.5,.5], 2,':')
 end
+
 
 axis equal
 axis([-1 1.5 -.025 1])
@@ -110,6 +115,13 @@ fill([xlim, flip(xlim)], [0, 0, -.025, -.025], [0,0,0])
 
 % Finally, drawnow
 drawnow
+end
+
+function draw_circle(x,y,r, circle_color, circle_thickness,linestyle)
+th = 0:pi/50:2*pi;
+xunit = r * cos(th) + x;
+yunit = r * sin(th) + y;
+h = plot(xunit, yunit, 'Color',circle_color,'LineWidth',circle_thickness,'LineStyle',linestyle);
 end
 
 

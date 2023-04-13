@@ -9,16 +9,15 @@ syms N_horizon_pts_out real
 % Decision variables
 zN = sym('zN',[num_states, N_horizon_pts], 'real');
 uN = sym('uN', [num_inputs, N_horizon_pts], 'real');
-lambda = sym('lambdaN_', [num_states, 1], 'real');
 
 % Define the decision vector 
-x = [uN(:); zN(:); lambda(:)];
+x = [uN(:); zN(:)];
 syms N_decision_vars;
 xPrev = sym('xPrev_',size(x));
 
 % Define how to extract from the decision vector
 uN_extracted = x(1:N_horizon_pts); 
-zN_extracted = reshape(x(N_horizon_pts + 1:end-num_states), num_states, []); 
+zN_extracted = reshape(x(N_horizon_pts + 1:end), num_states, []); 
 
 % Desired and expected trajectories
 zN_des = sym('zN_des',[num_states, N_horizon_pts], 'real');
@@ -52,10 +51,10 @@ z0 = sym('z0',[num_states,1], 'real');
 ic_constraint = zN(:,1) - z0; 
 
 % Define terminal condition constraint
-tf_constraint = zN(:,end) - zN_des(:,end) - lambda; 
+% tf_constraint = zN(:,end) - zN_des(:,end) - lambda; 
 
 % Group all equality constraints
-equality_constraints = [defect_constraints; ic_constraint; tf_constraint]; 
+equality_constraints = [defect_constraints; ic_constraint]; 
 
 % Obstacle Constraints
 pObs = sym('pObs',[2,1], 'real');
@@ -67,12 +66,16 @@ q = sym('q',[2,1]);
 BallbotCoMSymb = Ballbot.calcCOM_location(q); 
 BallbotCoMJac = jacobian(BallbotCoMSymb, q); 
 for ix = 1:N_horizon_pts
+    % Get the approximate location of the COM per linearization about
+    % expected trajectory
     curqNominal = [zN_exp(1,ix); zN_exp(3,ix)];
     curqActual = [zN(1,ix); zN(3,ix)];
     approximateCoMLocation = Ballbot.calcCOM_location(curqNominal) + ...
                              subs(BallbotCoMJac, q, curqNominal) * (curqActual - curqNominal);
     trueCoMLocation = Ballbot.calcCOM_location(curqActual);
-    heightLimit = pObs(2)-rObs + 20*(trueCoMLocation(1)-pObs(1))^2;
+    heightLimit = pObs(2)-rObs + 10*(trueCoMLocation(1)-pObs(1))^2;
+    % Get the approximate maximum height based on where the COM x
+    % coordinate is
     heightLimit_approx = subs(heightLimit, curqActual, curqNominal) + subs(jacobian(heightLimit,curqActual), curqActual, curqNominal) * (curqActual - curqNominal); 
     obstacleConstraint(ix) = approximateCoMLocation(2) - heightLimit_approx; 
 end
@@ -103,8 +106,7 @@ uN_error_flat = reshape(uError,[],1);
 syms mindChangeCost real
 planChangeCost = mindChangeCost*(x-xPrev).'*eye(length(xPrev)) * (x-xPrev); 
 J = zN_error_flat.'* kron(eye(N_horizon_pts), Q) * zN_error_flat + ...
-    uN_error_flat.'* kron(eye(N_horizon_pts), R) * uN_error_flat + ...
-    10*lambda .' * eye(num_states) * lambda;
+    uN_error_flat.'* kron(eye(N_horizon_pts), R) * uN_error_flat;
 J_withPlanChangeCost = J + planChangeCost; 
 
 % Calculate QP Matrices
