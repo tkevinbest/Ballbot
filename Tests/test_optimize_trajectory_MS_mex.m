@@ -4,13 +4,13 @@ close all
 [mk, mw, ma, rk, rw, ra,l, omegaK, omegaW, omegaA, g] = Ballbot.defineParams();
 
 % Desired X position
-desX = 1.25;
+desX = 1.0;
 
 % Number of nodes
-N = 25; 
+N = 26; 
 
 % Run MS
-q0 = [-pi;0];
+q0 = [-.5/rk;0];
 qdot0 = [0;0];
 qdes = [desX/rk;0];
 qdot_des = [0; 0];
@@ -27,3 +27,6 @@ Ballbot.plotTrajectories(tstar, z', ustar);
 
 % Animate ballbot
 Ballbot.animate(tstar, qstar','MultipleShootingTest_mex.mp4'); 
+
+%% Save still frames
+Ballbot.saveStillFrame(qstar(:,[1,6,14,18,N]),'MultipeShootingTest_mex');

@@ -79,7 +79,7 @@ for ix = 1:length(t_sim)
 
 
     % Solve optimal control
-    Q = diag([50, 1,5,1]); 
+    Q = diag([50, 1,25,1]); 
     R = 1; 
     tic
     [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, ...
