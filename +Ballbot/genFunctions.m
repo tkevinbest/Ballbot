@@ -112,15 +112,4 @@ F_lin_symb = zdot;
 matlabFunction(A_lin_symb, 'File','./+Ballbot/A_lin_symb','Vars',{z, u}); 
 matlabFunction(B_lin_symb, 'File','./+Ballbot/B_lin_symb','Vars',{z, u}); 
 matlabFunction(F_lin_symb, 'File','./+Ballbot/F_lin_symb', 'Vars',{z,u});
-
-% Calculate distance from COM to a point
-p = sym('p',[2,1], 'real');
-pCoM = Ballbot.calcCOM_location(q); 
-dCoM_to_Point = symVecNorm(p-pCoM); 
-d_dCoM_to_Point_dz = jacobian(dCoM_to_Point, z); 
-matlabFunction(dCoM_to_Point, 'File','./+Ballbot/calcDistFrom_CoM','Vars',{z, p}); 
-matlabFunction(d_dCoM_to_Point_dz, 'File','./+Ballbot/calcDistFrom_CoM_jacobian','Vars',{z, p}); 
-
-
-
 end
