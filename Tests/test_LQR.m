@@ -7,7 +7,7 @@ close all
 desX = 0.0;
 
 % Define desired states
-q0 = [-pi;-pi/16];
+q0 = [-pi;0];
 qdot0 = [0;0];
 qdes = [desX/rk;0];
 qdot_des = [0; 0];
@@ -30,7 +30,7 @@ A_dyn = Ballbot.A_lin_symb(zstar, ustar);
 B_dyn = Ballbot.B_lin_symb(zstar, ustar); 
 
 % Solve optimal control
-Q = diag([2, 1, .5,.5])*eye(4); 
+Q = diag([20, 1, .5,.5]); 
 R = 1; 
 k = lqr(A_dyn, B_dyn, Q, R); 
 forceFunc = @(t,z) -k*z; 
