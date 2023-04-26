@@ -5,6 +5,10 @@ This code was developed for a class project in Applied Optimal Control taught by
 
 The dynamics and modeling theory for this project was inspired by the Bachelor's Thesis by Fankhauser and Gwerder [1]. 
 
+## Getting Started
+1) Before doing anything, run [`SETUP.m`](SETUP.m) to configure MATLAB paths. If you forget this step, you'll likely get lots of unknown function errors. 
+2) The code in this repo is mainly organized in MATLAB Packages (Note the `+FolderName` notation). If you're unfamiliar with packages, read up on them on MathWorks's website before trying to edit the code or you'll likely be frustrated. 
+
 ## Dynamics and Simulation
 This repo contains the code to derive the equations of motion of the system using Lagrangian Mechanics. To update the dynamics and get started with a test simulation, use the following steps:
 1) Update the parameters in [`Ballbot.defineParams`](+Ballbot/defineParams.m)
