@@ -4,3 +4,4 @@ close all
 
 addpath(genpath('Utilities'))
 addpath('Tests')
+addpath('Coder Scripts')

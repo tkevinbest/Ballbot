@@ -95,7 +95,6 @@ inequality_constraints = [stateLowerLimits; stateUpperLimits;
     torqueLowerLimits; torqueUpperLimits;
     obstacleConstraint(:)]; 
 
-
 % Define cost function - just squared error for now
 Q = sym('Q',[num_states, num_states], 'real');
 R = sym('R',[num_inputs, num_inputs], 'real');
@@ -122,7 +121,7 @@ b = -subs(inequality_constraints, x, zeros(size(x)));
 % Export matlab functions
 simplifyAndWriteMatlabFunction( subs(N_horizon_pts_out, N_horizon_pts_out, N_horizon_pts),'File', './+Control/+MPC/getNumPtsForGeneratedCode');
 matlabFunction(H, c, H_withPCC, c_withPCC, Aeq, beq, A, b, 'File', './+Control/+MPC/getQP_funcs', 'Vars',{Q, R, T_horizon, z0, zN_des, uN_des,zN_exp, uN_exp, zLim, uLim, pObs, rObs, xPrev, mindChangeCost},...
-    "Outputs",{'H','c', 'H_withPCC', 'c_withPCC', 'Aeq','beq','A','b'},'Sparse',true, 'Optimize',false);
+    "Outputs",{'H','c', 'H_withPCC', 'c_withPCC', 'Aeq','beq','A','b'},'Sparse',false, 'Optimize',false);
 simplifyAndWriteMatlabFunction(uN_extracted,'File', './+Control/+MPC/extract_uN_from_DV', 'Vars', {x});
 simplifyAndWriteMatlabFunction(zN_extracted,'File', './+Control/+MPC/extract_zN_from_DV', 'Vars', {x});
 matlabFunction(subs(N_decision_vars, N_decision_vars, length(x)),'File', './+Control/+MPC/get_N_decisionVars');

@@ -26,7 +26,7 @@ z = interleave2(qstar, qdotstar, 'row');
 Ballbot.plotTrajectories(tstar, z', ustar); 
 
 % Animate ballbot
-Ballbot.animate(tstar, qstar','MultipleShootingTest_mex.mp4'); 
+Ballbot.animate(tstar, qstar','testMS.mp4'); 
 
 %% Save still frames
 Ballbot.saveStillFrame(qstar(:,[1,6,14,18,N]),'MultipeShootingTest_mex');

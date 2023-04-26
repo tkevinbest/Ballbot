@@ -18,12 +18,24 @@ else
     H_used = H;
     c_used = c;
 end
+persistent ws
 
-options = optimoptions("quadprog","Display",'off');
-[xtildestar, fval, exitFlag, output] = quadprog(H_used, c_used, A, b, Aeq, beq, [],[],[],options); 
+if coder.target('MATLAB')
+    options = optimoptions("quadprog","Display",'off');
+    [xtildestar, fval, exitFlag, output] = quadprog(H_used, c_used, A, b, Aeq, beq, [],[],[],options); 
+else
+    options = optimoptions("quadprog","Display",'off','Algorithm','active-set');
+    x0 = zeros(Control.MPC.get_N_decisionVars(),1);
+     
+    if isempty(ws)
+        ws = optimwarmstart(x0,options); 
+    end
+    [ws, fval, exitFlag, output] = quadprog(H_used, c_used, A, b, Aeq, beq, [],[],ws); 
+    xtildestar = ws.X;
+end
 if exitFlag < 0
     xtildestar = zeros(Control.MPC.get_N_decisionVars(),1);
-    disp(['MPC Failed. Quadprog exit flag ',num2str(exitFlag)]);
+    sprintf('MPC Failed. Quadprog exit flag %.1f',exitFlag)
 end
 MPCfailed = exitFlag < 0; 
 

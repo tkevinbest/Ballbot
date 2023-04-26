@@ -18,12 +18,12 @@ qdot0 = [0;0];
 z0 = interleave2(q0, qdot0, 'row'); 
 
 % Define obstacle
-pObs = [.25;.55];
-rObs = .1;
+pObs = [.25;.5];
+rObs = .05;
 
 %% Run MPC around nominal state
 % Configure controller
-dt = 0.005; % Real time sample rate
+dt = 0.05; % Real time sample rate
 timeHorizon = 2.5; 
 N_horizon = 51; % Nodes
 t_horizon = linspace(0, timeHorizon, N_horizon); 
@@ -56,9 +56,9 @@ for ix = 1:length(t_sim)
     uDesiredTraj = repmat(uDesired, 1, MPCconfig.N_horizon); 
 
     % Solve optimal control
-    Q = diag([50, 1,5,1]); 
-    R = 1; 
-    [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig, pObs, rObs);
+    Q = diag([50, 1,25,1]); 
+    R = .05;
+    [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.Run(Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig, pObs, rObs);
 
     zstarHist(:,:,ix) = zstar; 
     ustarHist(:,ix) = ustar'; 

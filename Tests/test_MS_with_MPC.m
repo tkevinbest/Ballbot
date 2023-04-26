@@ -10,12 +10,21 @@ desX = 1.0;
 N = 26; 
 
 % Define obstacle
-pObs = [.25;.5];
-rObs = .1;
+useObstacle = true; 
+if useObstacle
+    pObs = [.25;.5];
+    rObs = .05;
+else
+    pObs = [.25;5];
+    rObs = .05;
+end
+
+% Define torque noise
+useTorqueNoise = false;
 
 %% Run Multiple Shooting Trajectory Optimization
 % This calculates the nominal optimal trajectory
-q0 = [-1/rk;0];
+q0 = [-.5/rk;0];
 qdot0 = [0;0];
 z0 = interleave2(q0, qdot0, 'row');
 qdes = [desX/rk;0];
@@ -37,7 +46,7 @@ Ballbot.animate(tstar, qstar');
 
 %% Run MPC around nominal trajectory
 % Configure controller
-dt = 0.01; % Real time sample rate
+dt = 0.05; % Real time sample rate
 timeHorizon = 3; 
 N_horizon = 51; % Nodes
 t_horizon = linspace(0, timeHorizon, N_horizon); 
@@ -80,9 +89,9 @@ for ix = 1:length(t_sim)
 
     % Solve optimal control
     Q = diag([50, 1,25,1]); 
-    R = 1; 
+    R = .05; 
     tic
-    [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.run(Q, R, curZ, ...
+    [curU, zstar, ustar, MPCconfig, MPCfailed] = Control.MPC.Run_mex(Q, R, curZ, ...
                                                         zDesiredTraj_thisHorizon, ...
                                                         uDesiredTraj_thisHorizon, MPCconfig,...
                                                          pObs, rObs); 
@@ -92,7 +101,12 @@ for ix = 1:length(t_sim)
     mpcTime(ix) = toc;
 
     % Run simulation with said control 
-    forceFunc = @(t,z) curU ;
+    if useTorqueNoise
+        curU = curU + 2*randn;
+    end
+ 
+    forceFunc = @(t,z) curU;
+
     q0 = curZ([1,3],:);
     qdot0 = curZ([2,4],:);
     [t,q, qdot, z, ~] = Ballbot.runSimulation(q0, qdot0, forceFunc, curTime + [0,dt], false);
@@ -105,8 +119,8 @@ for ix = 1:length(t_sim)
     z_store(:,ix) = z(1,:)'; 
 
     % Plot progress
-%     Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
-%     drawnow; 
+    Control.MPC.plotTrajectoriesAndPrediction(t_sim(1:ix), z_store(:,1:ix)', u_store(1:ix), zstarHist, ustarHist, tHist); 
+    drawnow; 
 
     if MPCfailed
         t_sim = t_sim(1:ix-1); 
@@ -126,6 +140,7 @@ Ballbot.plotTrajectories(t_sim, z_store', u_store);
 q_store = [z_store(1,:); z_store(3,:)];
 Ballbot.animate(t_sim, q_store', 'TestMS_MPC.mp4', pObs, rObs);
 
-
+%% Save still frames
+% Ballbot.saveStillFrame(q_store(:,[1,6,18,29, N_sim]),'MS_MPC', pObs, rObs);
 
 
