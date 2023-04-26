@@ -22,7 +22,7 @@ q_anim = interp1(t, q, t_anim);
 
 if saveVideo
     warning('off','MATLAB:audiovideo:VideoWriter:mp4FramePadded');
-    if ~exist('Animations', 'dir')
+    if ~isfolder('Animations')
        mkdir('Animations')
     end
     v = VideoWriter(fullfile('Animations',videoName),'MPEG-4');

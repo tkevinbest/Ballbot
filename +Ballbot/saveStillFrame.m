@@ -6,6 +6,9 @@ if ~exist('pObs', 'var')
     rObs = [];
 end
 
+if ~isfolder('Figures')
+       mkdir('Figures')
+end
 
 f = figure(); % Create new figure for animation
 set(f,'outerposition',[89 177 1440 1080]) % Set its size and pos.
