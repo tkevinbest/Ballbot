@@ -1,6 +1,11 @@
 clear
 close all
 
+% This function uses matlab codegen to compile the MPC run method. 
+
+% These functions are just dummy variables so matlab can get the sizes
+% right
+
 % Configure controller
 dt = 0.005; % Real time sample rate
 timeHorizon = 2.5; 
@@ -24,5 +29,6 @@ MPCconfig = Control.MPC.setup(N_horizon, timeHorizon, t_sim, zExpected, uExpecte
 zDesiredTraj = repmat(curZ, 1, MPCconfig.N_horizon); 
 uDesiredTraj = repmat(0, 1, MPCconfig.N_horizon); 
 
+% Call codegen and make magic
 codegen -report +Control/+MPC/Run.m -args {Q, R, curZ, zDesiredTraj, uDesiredTraj, MPCconfig, pObs, rObs}
 
