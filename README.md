@@ -29,7 +29,7 @@ The MPC implementation is primarily through 2 functions. The test script [`Tests
 
 First, call the [`Control.MPC.setup.m`](+Control/+MPC/setup.m) function to configure the MPC functions. This method automatically generates MATLAB functions used to calculate matrices used in the MPC quadratic program using the Symbolic Math Toolbox. Note that if you use an excessive number of horizon nodes, this process can be quite time consuming. For this reason, the functions are only regenerated if the code detects that the settings have changed. 
 
-In each iteration of the loop, call [`Control.MPC.Run.m`](+Control/MPC.Run.m) to calculate the torque command for the current iteration. There is also a mex version of this function. If you modify the prediction horizon, this mex function will need to be rebuilt using the script [`Coder Scripts/codegenMPC_run.m`](<Coder Scripts/codegenMPC_run.m>)
+In each iteration of the loop, call [`Control.MPC.Run.m`](+Control/+MPC/Run.m) to calculate the torque command for the current iteration. There is also a mex version of this function. If you modify the prediction horizon, this mex function will need to be rebuilt using the script [`Coder Scripts/codegenMPC_run.m`](<Coder Scripts/codegenMPC_run.m>)
 
 ## Documentation
 The report detailing the theory behind this repository is included [here](Documentation/Ballbot_Control_Report.pdf).
