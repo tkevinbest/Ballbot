@@ -16,7 +16,7 @@ Here's an example of the multiple-shooting optimal controller moving the ballbot
 https://user-images.githubusercontent.com/70407790/227629255-93a0f35a-fe6e-471c-8e22-80b6b0ee4f2e.mp4
 
 ## Control
-The repo contains to control features: 1) A trajectory optimization built on multiple shooting that generates a control plan to move between two configurations in a minimum time. 2) A model predictive controller that stabilizes about the planned trajectory, rejects disturbances, and avoids obstacles. 
+The repo contains two control features: 1) A trajectory optimization built on multiple shooting that generates a control plan to move between two configurations in a minimum time. 2) A model predictive controller that stabilizes about the planned trajectory, rejects disturbances, and avoids obstacles. 
 
 ### Trajectory Optimization
 The main trajectory optimization function is found in [`Control.optimze_trajectory_MS.m`](+Control/optimize_trajectory_MS.m). There is also a `mex` version of the same function at [`Control.optimze_trajectory_MS_mex.mexw64`](+Control/optimize_trajectory_MS_mex.mexw64) that executes much faster. To make a new `mex` file, the MATLAB Coder project file is also provided. An example usage of the trajectory optimization function is provided in [`Tests/test_optimize_trajectory_MS_mex.m`](Tests/test_optimize_trajectory_MS_mex.m). Note that you can supply `NaN` values in the desired state to have the optimizer ignore that state. For example, you can set `qdes = [0; NaN]` to tell the optimizer to ignore the lean angle and only care about the ballbot's horizontal location. 
