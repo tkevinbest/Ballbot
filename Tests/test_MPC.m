@@ -18,7 +18,7 @@ qdot0 = [0;0];
 z0 = interleave2(q0, qdot0, 'row'); 
 
 % Define obstacle
-pObs = [.25;.5];
+pObs = [.25;.6];
 rObs = .05;
 
 %% Run MPC around nominal state
