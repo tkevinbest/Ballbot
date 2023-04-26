@@ -1,4 +1,5 @@
 # Ballbot
+![](Documentation/gifs/TestMS_MPC_obstacle_AdobeExpress.gif)
 This repo contains the dynamics, simulation, and control code for a planar ballbot system. A ballbot is a robot that balances atop a basketball and rolls the basketball underneath it in order to move about the world. Though similar to a segway, the ballbot is a particularly challenging system to control because its center of mass is significantly above the ball. This makes the dynamics more similar to an inverted pendulum on a cart. 
 
 This code was developed for a class project in Applied Optimal Control taught by Dr. Christian Hubicki in the Winter 2023 semester. The course was offered in person to Florida A&M / Florida State Univerisity students and remotely to University of Michigan students. 
@@ -15,10 +16,6 @@ This repo contains the code to derive the equations of motion of the system usin
 2) Run [`Ballbot.genFunctions`](+Ballbot/genFunctions.m)
 3) Run [`test_BallbotSimulation`](Tests/test_BallbotSimulation.m). In this script, you can modify the simulation parameters, such as the initial and final conditionds, constraints, and duration. 
 
-Here's an example of the multiple-shooting optimal controller moving the ballbot between two positions. 
-
-https://user-images.githubusercontent.com/70407790/227629255-93a0f35a-fe6e-471c-8e22-80b6b0ee4f2e.mp4
-
 ## Control
 The repo contains two control features: 1) A trajectory optimization built on multiple shooting that generates a control plan to move between two configurations in a minimum time. 2) A model predictive controller that stabilizes about the planned trajectory, rejects disturbances, and avoids obstacles. The system constraints, representing the physical limits of the system, are defined in [`Ballbot.defineConstraints.m`](+Ballbot/defineConstraints.m) and should be updated if the system parameters are changed. 
 
@@ -33,7 +30,7 @@ First, call the [`Control.MPC.setup.m`](+Control/+MPC/setup.m) function to confi
 In each iteration of the loop, call [`Control.MPC.Run.m`](+Control/MPC.Run.m) to calculate the torque command for the current iteration. There is also a mex version of this function. If you modify the prediction horizon, this mex function will need to be rebuilt using the script [`Coder Scripts/codegenMPC_run.m`](<Coder Scripts/codegenMPC_run.m>)
 
 ## Documentation
-The report detailing the theory behind this repository will be posted shortly. 
+The report detailing the theory behind this repository is included [here](Documentation/Ballbot_Control_Report.pdf).
 
 ## References
 [1] P. Fankhauser and C. Gwerder, “Modeling and control of a ballbot,” Bachelor’s Thesis, ETH Zurich, 2010, online: https://www.research-collection.ethz.ch/bitstream/handle/20.500.11850/154271/eth-7943-01.pdf.
