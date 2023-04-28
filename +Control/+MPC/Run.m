@@ -1,4 +1,4 @@
-function [u, zstar, ustar, MPCconfig, MPCfailed] = run(Q, R, curZ, zDesired, uDesired, MPCconfig, pObs, rObs)
+function [u, zstar, ustar, MPCconfig, MPCfailed] = Run(Q, R, curZ, zDesired, uDesired, MPCconfig, pObs, rObs)
 % Grab constraints from file
 [qLim, qdotLim, uLim] = Ballbot.defineConstraints(Control.OptimizationType.MPC);
 zLim = interleave2(qLim, qdotLim, 'row');
